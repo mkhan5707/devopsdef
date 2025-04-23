@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = 'thenfr932/servlet-app'
-        KUBE_CONFIG = credentials('kubeconfig-id') // Jenkins credentials: secret text
+        KUBE_CONFIG = credentials('kubeconfig-id') // Assuming secret text or file
     }
 
     stages {
@@ -15,20 +15,20 @@ pipeline {
 
         stage('Build WAR') {
             steps {
-                sh 'mvn clean package'
+                bat 'mvn clean package'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $IMAGE_NAME:$BUILD_NUMBER .'
+                bat "docker build -t %IMAGE_NAME%:%BUILD_NUMBER% ."
             }
         }
 
         stage('Push Docker Image') {
             steps {
                 withDockerRegistry([ credentialsId: 'docker-hub-creds', url: '' ]) {
-                    sh 'docker push $IMAGE_NAME:$BUILD_NUMBER'
+                    bat "docker push %IMAGE_NAME%:%BUILD_NUMBER%"
                 }
             }
         }
@@ -36,11 +36,11 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 withCredentials([file(credentialsId: 'kubeconfig-id', variable: 'KUBECONFIG_FILE')]) {
-                    sh '''
-                        export KUBECONFIG=$KUBECONFIG_FILE
-                        sed "s|IMAGE_TAG|$IMAGE_NAME:$BUILD_NUMBER|" k8s/deployment-template.yaml > k8s/deployment.yaml
+                    bat """
+                        set KUBECONFIG=%KUBECONFIG_FILE%
+                        powershell -Command "(Get-Content k8s/deployment-template.yaml) -replace 'IMAGE_TAG', '%IMAGE_NAME%:%BUILD_NUMBER%' | Set-Content k8s/deployment.yaml"
                         kubectl apply -f k8s/deployment.yaml
-                    '''
+                    """
                 }
             }
         }
