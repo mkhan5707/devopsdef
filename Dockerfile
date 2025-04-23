@@ -5,6 +5,6 @@ COPY . .
 RUN mvn clean package
 
 FROM tomcat:9.0-jdk8-openjdk
-COPY --from=build /app/target/SimpleServletApp.war /usr/local/tomcat/webapps/SimpleServletApp.war
+COPY --from=build /app/target/devops.war /usr/local/tomcat/webapps/devops.war
 EXPOSE 8085
 CMD ["catalina.sh", "run"]
