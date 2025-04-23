@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simpleservletapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simpleservletapp
+  template:
+    metadata:
+      labels:
+        app: simpleservletapp
+    spec:
+      containers:
+      - name: simpleservletapp
+        image: yourdockerhubusername/simpleservletapp:latest
+        ports:
+        - containerPort: 8080
